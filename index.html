@@ -1,9 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Hello, World!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Assistant</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-image {
+            background-image: url('SpanienBoote.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <div id="app" class="min-h-screen bg-image">
+        <div class="min-h-screen bg-black bg-opacity-50 flex flex-col">
+            <!-- Header -->
+            <header class="bg-black h-20 flex items-center justify-center">
+                <img src="logo.svg" alt="Adventure Assistant Logo" class="h-12">
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-grow flex flex-col items-center justify-center px-4 text-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-8 shadow-text">
+                    Hello, adventurer! I am your Personal Adventure Assistant, an AI-powered digital travel agency, designed to collaborate with you on crafting a journey that is uniquely yours
+                </h1>
+                
+                <button @click="showNewsletter" class="bg-teal-400 text-black font-bold py-3 px-6 rounded shadow-lg hover:bg-teal-500 transition duration-300">
+                    Start Your Adventure
+                </button>
+
+                <p class="text-white text-sm mt-16 max-w-md">
+                    Disclaimer: If there is any option or information that you do not wish to provide, feel free to leave it out.
+                </p>
+            </main>
+
+            <!-- Footer -->
+            <footer class="py-4">
+                <div class="flex justify-center space-x-4">
+                    <a href="#" @click.prevent="showImprint" class="text-white hover:text-gray-300">Impressum</a>
+                    <a href="#" @click.prevent="showPrivacyPolicy" class="text-white hover:text-gray-300">Privacy Policy/AGBs</a>
+                </div>
+            </footer>
+
+            <!-- Newsletter Modal -->
+            <div v-if="isNewsletterVisible" class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center">
+                <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+                
+                <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+                    <div class="modal-content py-4 text-left px-6">
+                        <div class="flex justify-between items-center pb-3">
+                            <p class="text-2xl font-bold">Website im Aufbau</p>
+                            <button @click="closeNewsletter" class="modal-close cursor-pointer z-50">
+                                <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                                    <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <p>Unsere Website befindet sich derzeit im Aufbau. Melden Sie sich für unseren Newsletter an, um über den Launch informiert zu werden!</p>
+                        
+                        <form @submit.prevent="submitNewsletter" action="https://formspree.io/f/xblreadw" method="POST" class="mt-4">
+                            <label class="block">
+                                Ihre E-Mail-Adresse:
+                                <input type="email" v-model="email" name="email" placeholder="Ihre E-Mail-Adresse" required
+                                       class="w-full px-3 py-2 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-100 focus:border-indigo-300">
+                            </label>
+                            <input type="hidden" name="message" v-model="message">
+                            <button type="submit" class="mt-4 w-full bg-teal-400 text-black font-bold py-2 px-4 rounded hover:bg-teal-500 transition duration-300">
+                                Anmelden
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    isNewsletterVisible: false,
+                    email: '',
+                    message: 'Newsletter Anmeldung'
+                }
+            },
+            methods: {
+                showNewsletter() {
+                    this.isNewsletterVisible = true
+                },
+                closeNewsletter() {
+                    this.isNewsletterVisible = false
+                },
+                submitNewsletter() {
+                    // The form will be submitted to Formspree
+                    // We'll just close the modal here
+                    this.closeNewsletter()
+                },
+                showImprint() {
+                    alert('Impressum wird angezeigt (Implementieren Sie hier die Navigation oder ein Modal)')
+                },
+                showPrivacyPolicy() {
+                    alert('Datenschutzerklärung wird angezeigt (Implementieren Sie hier die Navigation oder ein Modal)')
+                }
+            }
+        }).mount('#app')
+    </script>
 </body>
 </html>
