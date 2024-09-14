@@ -11,42 +11,105 @@
             background-image: url('SpanienBoote.jpg');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+        }
+        .bg-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
         }
         .modal {
             transition: opacity 0.25s ease;
+        }
+        .step-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .step-card {
+            flex: 1 1 200px;
+            max-width: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        .step-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .step-card:nth-child(1) { transition-delay: 0.1s; }
+        .step-card:nth-child(2) { transition-delay: 0.3s; }
+        .step-card:nth-child(3) { transition-delay: 0.5s; }
+        .step-card:nth-child(4) { transition-delay: 0.7s; }
+        .step-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
     <div id="app" class="min-h-screen bg-image">
-        <div class="min-h-screen bg-black bg-opacity-50 flex flex-col">
-            <!-- Header -->
-            <header class="bg-black h-20 flex items-center justify-center">
-                <img src="logo.svg" alt="Adventure Assistant Logo" class="h-12">
+        <div class="bg-overlay min-h-screen">
+            <!-- Fixed Header -->
+            <header class="fixed top-0 left-0 right-0 bg-black bg-opacity-80 h-20 flex items-center justify-between px-4 z-50">
+                <div class="w-20"><!-- Leerer Platzhalter für Ausgleich --></div>
+                <div class="absolute left-1/2 transform -translate-x-1/2">
+                    <a @click.prevent="scrollToTop" class="logo-link">
+                        <img src="logo.svg" alt="Adventure Assistant Logo" class="h-12">
+                    </a>
+                </div>
+                <button @click="toggleLanguage" class="text-white hover:text-gray-300 z-10">
+                    {{ currentLanguage === 'de' ? 'EN' : 'DE' }}
+                </button>
             </header>
 
-            <!-- Main Content -->
-            <main class="flex-grow flex flex-col items-center justify-center px-4 text-center">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-8 shadow-text">
-                    Hello, adventurer! I am your Personal Adventure Assistant, an AI-powered digital travel agency, designed to collaborate with you on crafting a journey that is uniquely yours
-                </h1>
-                
-                <button @click="showNewsletter" class="bg-teal-400 text-black font-bold py-3 px-6 rounded shadow-lg hover:bg-teal-500 transition duration-300">
-                    Start Your Adventure
-                </button>
+            <div class="pt-20"> <!-- Add padding-top to account for fixed header -->
+                <!-- Main Content -->
+                <main class="flex flex-col items-center justify-start px-4 text-center py-8">
+                    <!-- Hero Section -->
+                    <div class="w-full max-w-4xl mx-auto min-h-screen flex flex-col justify-center">
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8 shadow-text">
+                            {{ t('mainHeading') }}
+                        </h1>
+                        
+                        <button @click="showNewsletter" class="bg-teal-400 text-black font-bold py-3 px-6 rounded shadow-lg hover:bg-teal-500 transition duration-300 mb-8 mx-auto">
+                            {{ t('startButton') }}
+                        </button>
 
-                <p class="text-white text-sm mt-16 max-w-md">
-                    Disclaimer: If there is any option or information that you do not wish to provide, feel free to leave it out.
-                </p>
-            </main>
+                    </div>
 
-            <!-- Footer -->
-            <footer class="py-4">
-                <div class="flex justify-center space-x-4">
-                    <a href="#" @click.prevent="showImprint" class="text-white hover:text-gray-300">Impressum</a>
-                    <a href="#" @click.prevent="showPrivacyPolicy" class="text-white hover:text-gray-300">Privacy Policy/AGBs</a>
-                </div>
-            </footer>
+                    <!-- 4 Steps Section -->
+                    <div ref="stepSection" class="w-full max-w-4xl mx-auto min-h-screen flex flex-col justify-center">
+                        <h2 class="text-2xl font-bold text-white mb-8">{{ t('howItWorksTitle') }}</h2>
+                        <div class="step-cards">
+                            <div v-for="(step, index) in steps" :key="index" class="step-card" :class="{ 'visible': isStepVisible }">
+                                <div class="step-emoji">{{ step.emoji }}</div>
+                                <h3 class="font-bold mb-2">{{ t('step') }} {{ index + 1 }}</h3>
+                                <p>{{ t(step.key) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Footer -->
+                <footer class="bg-black py-4">
+                    <div class="container mx-auto px-4">
+                        <div class="flex flex-wrap justify-between items-center">
+                            <div class="flex space-x-4">
+                                <a :href="t('imprintLink')" class="text-white hover:text-gray-300">{{ t('imprint') }}</a>
+                                <a :href="t('privacyPolicyLink')" class="text-white hover:text-gray-300">{{ t('privacyPolicy') }}</a>
+                                <a :href="t('termsLink')" class="text-white hover:text-gray-300">{{ t('terms') }}</a>
+                            </div>
+                            <div class="text-white">
+                                Powered by <a href="https://webwai.de" target="_blank" rel="noopener noreferrer" class="hover:text-teal-400">webwai.de</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
 
             <!-- Newsletter Modal -->
             <div v-if="isNewsletterVisible" class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center">
@@ -55,7 +118,7 @@
                 <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
                     <div class="modal-content py-4 text-left px-6">
                         <div class="flex justify-between items-center pb-3">
-                            <p class="text-2xl font-bold">Website im Aufbau</p>
+                            <p class="text-2xl font-bold">{{ t('newsletterTitle') }}</p>
                             <button @click="closeNewsletter" class="modal-close cursor-pointer z-50">
                                 <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
                                     <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
@@ -63,17 +126,19 @@
                             </button>
                         </div>
 
-                        <p>Unsere Website befindet sich derzeit im Aufbau. Melden Sie sich für unseren Newsletter an, um über den Launch informiert zu werden!</p>
+                        <p v-if="!isSuccess">{{ t('newsletterDescription') }}</p>
                         
-                        <form @submit.prevent="submitNewsletter" action="https://formspree.io/f/xblreadw" method="POST" class="mt-4">
+                        <p v-if="isSuccess" class="text-green-600 font-bold">{{ t('newsletterSuccess') }}</p>
+
+                        <form v-if="!isSuccess" @submit.prevent="submitNewsletter" action="https://formspree.io/f/xblreadw" method="POST" class="mt-4">
                             <label class="block">
-                                Ihre E-Mail-Adresse:
-                                <input type="email" v-model="email" name="email" placeholder="Ihre E-Mail-Adresse" required
+                                {{ t('emailLabel') }}
+                                <input type="email" v-model="email" name="email" :placeholder="t('emailPlaceholder')" required
                                        class="w-full px-3 py-2 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-100 focus:border-indigo-300">
                             </label>
                             <input type="hidden" name="message" v-model="message">
                             <button type="submit" class="mt-4 w-full bg-teal-400 text-black font-bold py-2 px-4 rounded hover:bg-teal-500 transition duration-300">
-                                Anmelden
+                                {{ t('subscribeButton') }}
                             </button>
                         </form>
                     </div>
@@ -83,33 +148,154 @@
     </div>
 
     <script>
-        const { createApp } = Vue
+        const { createApp, ref, onMounted, onBeforeUnmount } = Vue
+
+        const translations = {
+            de: {
+                mainHeading: 'Hallo, Abenteurer! Ich bin dein persönlicher Abenteuer-Assistent, eine KI-gestützte digitale Reiseagentur, entwickelt um mit dir zusammen eine einzigartige Reise zu gestalten.',
+                startButton: 'Starte dein Abenteuer',
+                //disclaimer: 'Hinweis: Wenn es Optionen oder Informationen gibt, die Sie nicht angeben möchten, lassen Sie diese einfach aus.',
+                imprint: 'Impressum',
+                privacyPolicy: 'Datenschutzerklärung/AGBs',
+                terms: 'AGB',
+                imprintLink: 'impressum.html',
+                privacyPolicyLink: 'datenschutz.html',
+                termsLink: 'agb.html',
+                newsletterTitle: 'Website im Aufbau',
+                newsletterDescription: 'Unsere Website befindet sich derzeit im Aufbau. Melden Sie sich für unseren Newsletter an, um über den Launch informiert zu werden!',
+                newsletterSuccess: 'Vielen Dank für Ihre Anmeldung! Wir halten Sie auf dem Laufenden.',
+                emailLabel: 'Ihre E-Mail-Adresse:',
+                emailPlaceholder: 'Ihre E-Mail-Adresse',
+                subscribeButton: 'Anmelden',
+                errorMessage: 'Es gab ein Problem bei der Anmeldung. Bitte versuchen Sie es später erneut.',
+                howItWorksTitle: 'So funktioniert\'s:',
+                step: 'Schritt',
+                step1: 'Finde dein Lieblingsland durch Swipen, abgestimmt auf deine Hobbys, Lieblingsessen und andere Präferenzen.',
+                step2: 'Entdecke deine bevorzugte Region auf die gleiche Weise wie das Land.',
+                step3: 'Wähle deine Lieblingsstädte im selben Stil wie Land und Region.',
+                step4: 'Erhalte einen detaillierten Reiseplan mit passenden Attraktionen und Buchungslinks.',
+                privacyPolicy: 'Datenschutzerklärung'
+            },
+            en: {
+                mainHeading: 'Hello, adventurer! I am your Personal Adventure Assistant, an AI-powered digital travel agency, designed to collaborate with you on crafting a journey that is uniquely yours.',
+                startButton: 'Start Your Adventure',
+                //disclaimer: 'Disclaimer: If there is any option or information that you do not wish to provide, feel free to leave it out.',
+                imprint: 'Imprint',
+                privacyPolicy: 'Privacy Policy/Terms',
+                terms: 'Terms',
+                imprintLink: 'imprint.html',
+                privacyPolicyLink: 'privacy-policy.html',
+                termsLink: 'terms.html',
+                newsletterTitle: 'Website Under Construction',
+                newsletterDescription: 'Our website is currently under construction. Sign up for our newsletter to be informed about the launch!',
+                newsletterSuccess: 'Thank you for subscribing! We\'ll keep you updated.',
+                emailLabel: 'Your email address:',
+                emailPlaceholder: 'Your email address',
+                subscribeButton: 'Subscribe',
+                errorMessage: 'There was a problem with the subscription. Please try again later.',
+                howItWorksTitle: 'How it works:',
+                step: 'Step',
+                step1: 'Find your favorite country by swiping, matched to your hobbies, favorite foods, and other preferences.',
+                step2: 'Discover your preferred region in the same fashion as the country.',
+                step3: 'Choose your favorite cities in the same style as country and region.',
+                step4: 'Receive a detailed travel plan with suitable attractions and booking links.'
+            }
+        }
 
         createApp({
-            data() {
+            setup() {
+                const currentLanguage = ref('de')
+                const isNewsletterVisible = ref(false)
+                const isSuccess = ref(false)
+                const email = ref('')
+                const message = ref('Newsletter Anmeldung')
+                const isStepVisible = ref(false)
+                const stepSection = ref(null)
+
+                const steps = [
+                    { key: 'step1', emoji: '🌍' },
+                    { key: 'step2', emoji: '🏞️' },
+                    { key: 'step3', emoji: '🏙️' },
+                    { key: 'step4', emoji: '🗺️' },
+                ]
+
+                const handleScroll = () => {
+                    if (stepSection.value) {
+                        const rect = stepSection.value.getBoundingClientRect()
+                        isStepVisible.value = rect.top < window.innerHeight && rect.bottom >= 0
+                    }
+                }
+
+                onMounted(() => {
+                    window.addEventListener('scroll', handleScroll)
+                    handleScroll() // Initial check
+                })
+
+                onBeforeUnmount(() => {
+                    window.removeEventListener('scroll', handleScroll)
+                })
+
+                const scrollToTop = () => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+
                 return {
-                    isNewsletterVisible: false,
-                    email: '',
-                    message: 'Newsletter Anmeldung'
+                    currentLanguage,
+                    isNewsletterVisible,
+                    isSuccess,
+                    email,
+                    message,
+                    steps,
+                    isStepVisible,
+                    stepSection,
+                    scrollToTop
                 }
             },
             methods: {
+                t(key) {
+                    return translations[this.currentLanguage][key] || key
+                },
+                toggleLanguage() {
+                    this.currentLanguage = this.currentLanguage === 'de' ? 'en' : 'de'
+                },
                 showNewsletter() {
                     this.isNewsletterVisible = true
+                    this.isSuccess = false
                 },
                 closeNewsletter() {
                     this.isNewsletterVisible = false
+                    this.email = ''
                 },
                 submitNewsletter() {
-                    // The form will be submitted to Formspree
-                    // We'll just close the modal here
-                    this.closeNewsletter()
+                    fetch("https://formspree.io/f/xblreadw", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            email: this.email,
+                            message: this.message
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            this.isSuccess = true
+                            this.email = ''
+                        } else {
+                            alert(this.t('errorMessage'))
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error)
+                        alert(this.t('errorMessage'))
+                    })
                 },
                 showImprint() {
-                    alert('Impressum wird angezeigt (Implementieren Sie hier die Navigation oder ein Modal)')
+                    alert(this.t('imprint'))
                 },
                 showPrivacyPolicy() {
-                    alert('Datenschutzerklärung wird angezeigt (Implementieren Sie hier die Navigation oder ein Modal)')
+                    alert(this.t('privacyPolicy'))
                 }
             }
         }).mount('#app')
